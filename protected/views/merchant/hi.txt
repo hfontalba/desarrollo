@@ -1,0 +1,8 @@
+			$patron = array('/\{/', '/[a-z]/', '/[1a]/', '/\{/'); 
+			$sustitucion = array(null);
+			$price_preg = preg_replace($patron, $sustitucion, $price); 
+			$price_str = str_replace('}', '',$price_preg);
+			$price_str_2 = (str_replace('"', '',$price_str));
+			$price_explode = explode(':', $price_str_2);
+			$presentacion_producto = $price_explode[0];
+			$precio_producto = $price_explode[1];

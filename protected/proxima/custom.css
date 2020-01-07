@@ -1,0 +1,381 @@
+@font-face {
+    font-family: 'proxima_nova';
+    src: url('fonts/mark_simonson_-_proxima_nova_black-webfont.woff2') format('woff2'),
+         url('fonts/mark_simonson_-_proxima_nova_black-webfont.woff') format('woff');
+    font-weight: 900;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'proxima_nova';
+    src: url('fonts/mark_simonson_-_proxima_nova_bold-webfont.woff2') format('woff2'),
+         url('fonts/mark_simonson_-_proxima_nova_bold-webfont.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'proxima_nova';
+    src: url('fonts/mark_simonson_-_proxima_nova_extrabold-webfont.woff2') format('woff2'),
+         url('fonts/mark_simonson_-_proxima_nova_extrabold-webfont.woff') format('woff');
+    font-weight: 800;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'proxima_nova';
+    src: url('fonts/mark_simonson_-_proxima_nova_light-webfont.woff2') format('woff2'),
+         url('fonts/mark_simonson_-_proxima_nova_light-webfont.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'proxima_nova';
+    src: url('fonts/mark_simonson_-_proxima_nova_regular-webfont.woff2') format('woff2'),
+         url('fonts/mark_simonson_-_proxima_nova_regular-webfont.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'proxima_nova';
+    src: url('fonts/mark_simonson_-_proxima_nova_semibold-webfont.woff2') format('woff2'),
+         url('fonts/mark_simonson_-_proxima_nova_semibold-webfont.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'proxima_nova';
+    src: url('fonts/mark_simonson_-_proxima_nova_thin-webfont.woff2') format('woff2'),
+         url('fonts/mark_simonson_-_proxima_nova_thin-webfont.woff') format('woff');
+    font-weight: 200;
+    font-style: normal;
+
+}
+
+
+
+.arabic {
+    direction: rtl;
+}
+.arabic .top-menu-wrapper .container .col-md-3 {
+    float: right;
+}
+.arabic .top-menu-wrapper .container .col-md-9 {
+    float: left;
+    display: flex;
+    justify-content: flex-end;
+}
+.arabic .bt-text {
+    padding-right: 0px;
+    padding-left: 20px;
+}
+.arabic .language-selection {
+    padding-right: 10px!important;
+}
+.arabic .order-steps-container .order-steps-expander .trigger::after {
+    transform: rotate(180deg);
+}
+.arabic .language-selection img {
+    margin-right: 0px;
+    margin-top: -3px;
+    margin-left: 7px;
+}
+.arabic .search-input-wraps .col-xs-10, 
+.arabic .search-input-wraps .col-sm-11 {
+    position: relative;
+    float: right;
+}
+.arabic .search-input-wraps .col-xs-2 {
+    position: relative;
+    float: left;
+}
+.arabic .search-input-wraps button[type="submit"] {
+    right: -97px;
+}
+.arabic  .blog-block .read-more-btn {
+    float: left!important;
+}
+.arabic  .download-from .pull-left {
+    float: right!important;
+}
+.arabic  .download-from a:first-child {
+    margin-right: 0px;
+    margin-left: 25px;
+}
+.arabic .owl-carousel,
+.arabic .bx-wrapper { direction: ltr; }
+.arabic .owl-carousel .owl-item { direction: rtl; }
+.arabic #my-search-results #mobile-search-filter {
+    float: right;
+}
+.arabic #my-search-results .search-right-content  {
+    float: right;
+}
+.arabic .sort-wrap .new-left-cl {
+    float: right;
+}
+.arabic .sort-wrap  .new-right-cl {
+    float: right;
+}
+.arabic .sort-wrap .orange-button {
+    float: left;
+}
+.arabic .result-merchant .inner.list-view, 
+.arabic .result-merchant .inner.list-view h2, 
+.arabic #browse-list .inner {
+    text-align: right;
+}
+.arabic .result-merchant .inner.list-view .mytable {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+.arabic .result-merchant .inner.list-view .mytable .mycol {
+    padding-right: 0px;
+    padding-left: 15px;
+}
+
+.arabic .filter-box .search-input-wraps button[type="submit"] {
+    right: auto;
+    left: 10px;
+}
+.arabic .menu-left-content #menu-tab-wrapper ul#tabs {
+    text-align: right;
+}
+.arabic  #my-food-menu > .container > .row {
+    display: flex;
+    flex-direction: row;
+}
+.arabic #menu-tab-wrapper #tab li > .row {
+    display: flex;
+    flex-direction: row;
+}
+.arabic .search-food-wrap button {
+    left: 10px;
+    right: auto;
+}
+.arabic #menu-list-wrapper h2::after {
+    right: 0px;
+    left: auto;
+}
+.arabic .menu-list-row .col-md-2 {
+    padding-right: 0px!important;
+}
+.arabic  #menu-tab-wrapper .category-list .category a span {
+    position: absolute;
+    left: 0px;
+}
+.arabic #my-food-menu #menu-tab-wrapper .category a {
+    padding-right: 30px;
+}
+.arabic  #menu-tab-wrapper .category-list .category a i {
+    transform: rotate(180deg);
+}
+.arabic .order-title-new {
+    text-align: right!important;
+} 
+.arabic .delivery-asap {
+    text-align: right;
+}
+.arabic .dl-info {
+    text-align: right;
+}
+.arabic .dl-info .change-address {
+    text-align: right;
+}
+.arabic .new-flex-header .flex-logo {
+    margin-left: 30px;
+    margin-right: 0px;
+}
+.arabic .flex-details h1 {
+    text-align: right;
+}
+.arabic .new-flex-header {
+    text-align: left;
+}
+.arabic .item-order-wrap .summary-wrap .row,
+.arabic .item-order-wrap .summary-wrap .cart_subtotal {
+    display: flex;
+    flex-direction: row;
+}
+.arabic #menu-right-content .clear-cart {
+    left: 15px;
+    right: auto;
+}
+.arabic #mylogin .container > .row {
+    display: flex;
+    flex-direction: row;
+}
+.arabic #mylogin .login-form h2 {
+    text-align: right;
+}
+.arabic .login-form h1 {
+    text-align: right;
+}
+.arabic #mylogin .border-r {
+    border-right: 0px;
+    border-left: 1px solid #eee;
+}
+.arabic #mylogin .fb-button.orange-button {
+    margin-right: 0px;
+}
+.arabic #form-signup .col-md-5 {
+    float: right;
+}
+.arabic #frm-delivery p {
+    padding-right: 30px;
+}
+.arabic #frm-delivery .row .col-md-10, .arabic #frm-delivery .row .addressCard {
+    float: right;
+}
+.arabic .intl-tel-input input, 
+.arabic .intl-tel-input input[type="text"], 
+.arabic .intl-tel-input input[type="tel"] {
+    padding-right: 48px;
+}
+.arabic .addressCard h4 a {
+    text-align: right;
+}
+.arabic .intl-tel-input .selected-flag {
+    height: 100%;
+}
+.arabic  .intl-tel-input .selected-flag .iti-flag {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    right: 18px;
+}
+.arabic .new-rofile-section ul#tab {
+    width: 75%;
+    padding-left: 0px;
+    padding-right: 30px;
+}
+.arabic  .new-rofile-section ul#tabs li i {
+    margin-right: 0px;
+    margin-left: 10px;
+}
+.arabic  .section-order-history i::before {
+    transform: rotate(180deg);
+}
+#addressCards .addressCard .caption,
+#addressCards .addressCard .caption h3 {
+    text-align: right;
+}
+#addressCards .addressCard .options {
+    float: left;
+}
+.arabic #frm-delivery p {
+    margin: 15px 0px 0px 25px;
+}
+.arabic  #menu .logout-menu a:hover {
+    border: 0px solid #0c9661 !important;
+}
+.arabic  #menu .green-button a:hover {
+    border: 0px solid #23c562 !important;
+}
+.arabic  #frm-creditcard .cc-add {
+    padding: 10px 20px!important;
+}
+.arabic .new-flex-header .flex-left{
+    text-align: right!important;
+}
+.arabic .new-flex-header .flex-right {
+    text-align: left!important;
+    line-height: 30px;
+}
+.arabic #book-table-form input[type="text"], 
+.arabic #book-table-form input[type="email"], 
+.arabic #book-table-form input[type="tel"], 
+.arabic #book-table-form textarea {
+    text-align: right;
+}
+.arabic #frm-book .row {
+    display: flex;
+    flex-direction: row;
+}
+#featured-restaurant {
+    padding: 60px 0px 80px;
+    background: #f3f3f3;
+}
+.how-it-works-block {
+    padding-bottom: 90px!important;
+}
+@media (max-width: 700px) {
+    .arabic .top-menu-wrapper .bt-text {
+        display: none;
+    }
+   
+    .arabic #menu {
+        margin-top: 0px;
+    } 
+    .arabic #menu a {
+        padding: 6px 20px!important;
+    }  
+    .arabic  #featured-restaurant {
+        padding: 20px 20px 40px;
+    }
+    .arabic .search-input-wraps button[type="submit"] {
+        right: 6px;
+    }
+    .top-menu-wrapper {
+        top: 10px !important;
+    }
+    .arabic #my-search-results .search-right-content {
+        float: none;
+    }
+    .arabic .col-md-3.mobile-no-padding {
+        padding: 0px 20px 0px 20px !important;
+    }
+    .sort-wrap .btn-group > .btn:first-child {
+        margin-left: -20px;
+    }
+    .top-menu-wrapper .col-b, .parallax-mirror, .logo-desktop, .search-left-content, .search-view-map, .menu-right-content, #change-package-wrap, #section-social-login {
+        display: block;
+    }
+    #menu a {
+        color: #292929;
+        font-family: "Open Sans",sans-serif;
+        background: #60ba62;
+        color: #fff;
+        padding: 8px 10px!important;
+        border-radius: 30px;
+        transition: all .25s ease;
+        border: 2px solid #60ba62;
+        font-size: 12px!important;
+    }
+    .logo-desktop, .bt-text {
+        display: none;
+    }
+    .top-menu-wrapper .col-b {
+        margin-top: 0px;
+        padding: 0px;
+    }
+    .top-menu-wrapper .col-a {
+        margin-top: 0px;
+        padding: 0px;
+    }
+    .arabic .language-selection {
+        padding-right: 0px !important;
+    }
+    #my-search-results .sort-wrap .btn-group > .btn:first-child {
+        margin-left: 0px;
+    }
+    #my-search-results .mobile-no-padding {
+        padding: 20px 20px 0px 20px !important;
+    }
+    .mobile-no-padding {
+     padding: 20px 20px 0px 20px !important;
+    }
+    
+}
+
+#menu .logout-menu a:hover, #menu .green-button a:hover {
+
+    border: 0px solid #60ba62 !important;
+    background-color: rgb(41, 159, 209) !important;
+
+}
