@@ -613,6 +613,19 @@ class ApiController extends CController
 		$this->output();
 	}
 	
+
+
+
+/************************** HAY QUE CAMBIAR AQUI LOS PRECIOS PARA MOSTRAR TAMBIEN EN USD. **********************************/
+
+/***************************************************************
+ * SECCION MODIFICADO POR:
+ * HENRY J.N. FONTALBA L.
+ * OBJETIVOS: MODIFICACION EN LOS DETALLES DE CADA PRODUCTO
+ * PARA VER SI DISPONEN DE INVENTARIO Y MOSTRAR LA CANTIDAD DE 
+ * DISPONIBLES Y LOS PRECIOS EN $.
+ ***************************************************************/ 
+
 	public function actionGetItemByCategory()
 	{				
 		if (!isset($this->data['cat_id'])){
@@ -624,8 +637,11 @@ class ApiController extends CController
 			$this->output();
 		}
 		
-		$disabled_ordering=getOption($this->data['merchant_id'],'merchant_disabled_ordering');		
-		
+		$disabled_ordering=getOption($this->data['merchant_id'],'merchant_disabled_ordering');
+
+		#Consulto si el Establecimiento dispone de Inventario
+		$inventory=Yii::app()->functions->getNeedInventory($this->data['merchant_id']);
+
 		if ($res=Yii::app()->functions->getItemByCategory($this->data['cat_id'],false,$this->data['merchant_id'])){
 						
 			$item='';
@@ -660,11 +676,61 @@ class ApiController extends CController
 					}
 				}				
 				
+
 				/*dump($price);
 				die();*/
 							
 				$trans=getOptionA('enabled_multiple_translation'); 
+				
+
+				#Verifico si el Establecimiento dispone de un Stock de Inventario.
+				if ($inventory['need_inventory'] == 1)
+				{
+					#caso donde no disponde de un stock de inventario
+					if ( $trans==2 && isset($_GET['lang_id']))
+					{
+						$item[]=array(
+						  'item_id'=>$val['item_id'],
+						  
+						  'item_name'=>AddonMobileApp::translateItem('item',$val['item_name'],
+						  $val['item_id'],'item_name_trans'),
+						  
+						  'item_description'=>AddonMobileApp::translateItem('item',$val['item_description'],
+						  $val['item_id'],'item_description_trans'),
+						  
+						  'discount'=>$val['discount'],
+						  'photo'=>AddonMobileApp::getImage($val['photo']),
+						  'spicydish'=>$val['spicydish'],
+						  'dish'=>$val['dish'],
+						  'single_item'=>$val['single_item'],
+						  'single_details'=>$val['single_details'],
+						  'not_available'=>$val['not_available'],
+						  'prices'=>$price,
+						  'need_inventory'=>$inventory['need_inventory']
+						);
+					}else{
+						$item[]=array(
+						  'item_id'=>$val['item_id'],
+						  'item_name'=>$val['item_name'],
+						  'item_description'=>$val['item_description'],
+						  'discount'=>$val['discount'],
+						  'photo'=>AddonMobileApp::getImage($val['photo']),
+						  'spicydish'=>$val['spicydish'],
+						  'dish'=>$val['dish'],
+						  'single_item'=>$val['single_item'],
+						  'single_details'=>$val['single_details'],
+						  'not_available'=>$val['not_available'],
+						  'prices'=>$price,
+						  'need_inventory'=>$inventory['need_inventory']
+						);
+					}
+				}else{
+					#caso donde si disponde de un Stock de Inventario.
+
+				}
+				
 				if ( $trans==2 && isset($_GET['lang_id'])){
+					
 					$item[]=array(
 					  'item_id'=>$val['item_id'],
 					  
@@ -764,6 +830,11 @@ class ApiController extends CController
 		$this->output();
 	}
 	
+
+
+	/************************** HAY QUE CAMBIAR AQUI LOS PRECIOS PARA MOSTRAR TAMBIEN EN USD. **********************************/
+
+
 	public function actionGetItemDetails()
 	{		
 		if (!isset($this->data['item_id'])){
@@ -1494,7 +1565,7 @@ class ApiController extends CController
 				} 
 				
 			    $this->code=1;
-			    $this->msg="OK estoy en el agregar a carrito";
+			    $this->msg="OK";
 			    $this->details=array(		
 			      /*'is_merchant_open'=>$is_merchant_open,
 			      'merchant_preorder'=>$merchant_preorder,*/
@@ -2803,7 +2874,6 @@ class ApiController extends CController
 		  'email_address'=>$this->t("email address is required"),
 		  'password'=>$this->t("password is required"),
 		  'cpassword'=>$this->t("confirm password is required"),
-		  'type_identification_card'=>$this->t("nacionality is required"),
 		  'identification_card'=>$this->t("identification card is required"),
 		  'birthday'=>$this->t("birthdate is required"),
 		);
@@ -2853,7 +2923,7 @@ class ApiController extends CController
 	    		  'contact_phone'=>$p->purify($this->data['contact_phone']),
 	    		  'token'=>$token,
 	    		  'social_strategy'=>"mobile",
-	    		  'id_card'=>$p->purify($this->data['type_identification_card'].$this->data['identification_card']),
+	    		  'id_card'=>$p->purify($this->data['identification_card']),
 	    		  'birthdate'=>$p->purify($this->data['birthday'])
 	    		);	    	    	
 	    		
@@ -6926,47 +6996,53 @@ class ApiController extends CController
 				$DbExt->updateData("{{mobile_cart}}",$params,'device_id',$this->data['device_id']);
 			}								
 		}	
-		$this->code=3;
+		$this->code=1;
 		$this->msg="OK";
 		$this->output();
 	}
 	
 
 /**** codigo modificado por henry fontalba ****/ 
-
-
 	public function actionUpdate_item()
 	{
-
 		if (isset($this->data['item']))
 		{
 			$item = json_decode($this->data['item'], true);
 			$DbExt=new DbExt;
-			$params = array('item_id'=>$item['item_id'],
-							'item_cant'=>$item['item_cant']);
-			$DbExt->updateData("{{item}}", $params, 'item_id',  $item['item_id']);
-			
+
+			$item_id = $item['item_id'];
+			$item_cant = $item['item_cant'];
+			$params = array('item_id'=>$item_id,
+							'item_cant'=>$item_cant);
+
+			$DbExt->updateData("{{item}}",$params,'item_id',$item_id);
+
+			$this->code=1;
+			$this->msg="ACTUALIZACION REALIZADO CON EXITO";
+			$this->output();
+			$this->actionGetItem();
+		}else {
+			$this->code=0;
+			$this->msg="ERROR AL ACTUALIZAR!!!";
+			$this->output();
 		}
-		
-		$this->code=1;
-		$this->msg="OK";
-		$this->output();
-		// $item_id = $item['item_id'];
-		// $item_cant = $item['item_cant'];
-		// dump($item_id);
-		// $params = array('item_id'=>$item_id,
-		// 				'item_cant'=>$item_cant);
-
-		// $DbExt->updateData("{{item}}", $params, 'item_id',  $item_id);
-// aqui va la sentencia sql que necesito //
-
-		//$this->code=1;
-		//$this->msg="OK";
-		//$this->output();
 	}
+	/*public function actionUpdate_item()
+	{
+		if (isset($this->data['item']))
+		{
+			$item[] = json_decode($this->data['item'], true);
+			$DbExt=new DbExt;
+			//$params = array('item_id'=>$item['item_id'],
+							'item_cant'=>$item['item_cant']);
+			//$DbExt->updateData("{{item}}", $params, 'item_id',  $item['item_id']);
+			$this->code=$item['item_id'];
+			$this->msg="OK";
+			$this->output();
+		}
+	}*/
 
 	
-
 	public function actionClearCart()
 	{
 		$DbExt=new DbExt;
@@ -8560,6 +8636,9 @@ class ApiController extends CController
 		$this->output();
 	}
 	
+
+
+
 	public function actiongetItemCount()
 	{		
 		if (!isset($this->data['merchant_id'])){
@@ -8623,6 +8702,14 @@ class ApiController extends CController
 		$this->output();
 	}
 	
+/***************************************************************
+ * SECCION MODIFICADO POR:
+ * HENRY J.N. FONTALBA L.
+ * OBJETIVOS: MODIFICACION EN LOS DETALLES DE CADA PRODUCTO
+ * PARA VER SI DISPONEN DE INVENTARIO Y MOSTRAR LA CANTIDAD DE 
+ * DISPONIBLES Y LOS PRECIOS EN $.
+ ***************************************************************/ 
+
 	public function actiongetItem()
 	{
 		if (!isset($this->data['merchant_id'])){
@@ -8676,17 +8763,27 @@ class ApiController extends CController
 				$multi_option= Yii::app()->functions->multiOptionToArray($val['multi_option']);
 				$multi_option_val= Yii::app()->functions->multiOptionToArray($val['multi_option_value']);
 				
+				#Obtengo los precios en Bs. y en USD.
 				$price = Yii::app()->functions->sizePriceToArray($val['price']);
+				$price_usd = Yii::app()->functions->sizePriceUsdToArray($val['price_usd']);
+				//var_dump($price_usd);
+
 				$cooking_ref = Yii::app()->functions->cookingRefToArray($val['cooking_ref']);
 				$addon_item = Yii::app()->functions->addOnItemToArray($val['addon_item'],$multi_option,$multi_option_val);
 				
 				$single_item=1;
 				$single_details='';
-				if (!is_array($addon_item) && count($addon_item)<=1){					
-					if ( count($price)<=1){
+
+				#Se verifica si hay un unico precio y si no tiene extra el producto obtenido 				
+				if (!is_array($addon_item) && count($addon_item)<=1)
+				{					
+					if ((count($price)<=1) && (count($price_usd <=1)))
+					{
 					   $single_item=2;					   
 					   $single_details['price']=$price[0]['price']-$val['discount'];
 					   $single_details['size']=$price[0]['size'];
+					   $single_details['price_usd']=$$price[0]['price_usd']-$val['discount'];
+					  // $single_details['size_usd']=$price_usd[0]['size'];
 					}
 				}								
 				if (is_array($cooking_ref) && count($cooking_ref)>=1){
@@ -8700,6 +8797,8 @@ class ApiController extends CController
 					$single_item=1;
 				}	
 				
+
+				#Verifico si existe mas de una Presentacion para el producto en Bs.S
 				$price_new='';	
 				if (is_array($price)  && count($price)>=1){
 					foreach ($price as $val_price) {
@@ -8722,6 +8821,31 @@ class ApiController extends CController
 					}
 				}				
 				
+				$priceUsd_new='';
+
+				if (is_array($price_usd)  && count($price_usd)>=1){
+					foreach ($price_usd as $val_price_usd) {
+						$$val_price_usd['price_pretty']=displayPrice('USD.',prettyFormat($val_price_usd['price_usd']));
+												
+						if(isset($_GET['lang_id'])){
+						  if($_GET['lang_id']>0){
+						  	 if (array_key_exists($_GET['lang_id'],(array)$val_price_usd['size_trans'])){
+						  	 	$val_price_usd['size']=$val_price_usd['size_trans'][$_GET['lang_id']];
+						  	 }						  						  	 
+						  }						
+						}										
+						
+						if ($val['discount']>0){
+						    $val_price_usd['price_discount']=$val_price_usd['price_usd']-$val['discount'];
+						    $val_price_usd['price_discount_pretty']=
+						    AddonMobileApp::prettyPrice($val_price_usd['price_usd']-$val['discount']);
+						}					
+						$priceUsd_new[]=$val_price_usd;
+					}
+				}			
+
+
+
 				if(isset($this->data['lang'])){					
 					$item_name_trans = !empty($val['item_name_trans'])?json_decode($val['item_name_trans'],true):false;
 					if(is_array($item_name_trans) && count($item_name_trans)>=1){					   
@@ -8753,11 +8877,13 @@ class ApiController extends CController
 				      'spicydish'=>$val['spicydish'],
 				      'dish'=>$val['dish'],			      
 				      'prices'=>$price_new,
+				      'prices_usd'=>$priceUsd_new,
 				      'item_cant'=>$val['item_cant'],				
 				      'single_item'=>$single_item,
 				      'single_details'=>$single_details,
 				      'not_available'=>$val['not_available'],
-				      'icon_dish'=>$icon_dish
+				      'icon_dish'=>$icon_dish,
+				      'need_inventory'=>$inventory
 				    );			
 				}else
 				{
@@ -8770,11 +8896,13 @@ class ApiController extends CController
 				      'spicydish'=>$val['spicydish'],
 				      'dish'=>$val['dish'],			      
 				      'prices'=>$price_new,
+				      'prices_usd'=>$priceUsd_new,
 				      'item_cant'=>$val['item_cant'],				
 				      'single_item'=>$single_item,
 				      'single_details'=>$single_details,
 				      'not_available'=>$val['not_available'],
-				      'icon_dish'=>$icon_dish
+				      'icon_dish'=>$icon_dish,
+				      'need_inventory'=>$inventory
 				    );			
 				}
 				
@@ -8804,6 +8932,8 @@ class ApiController extends CController
 		
 		$this->output();
 	}
+
+/*******************************************************************************************************************************/
 	
 	public function actionGetCategoryList()
 	{
@@ -9137,6 +9267,44 @@ class ApiController extends CController
     }
     
     
+    /// Creado por Luis Sarabia 07/01/2020 ///
+   public function actionloadStablishimentTop()
+    {	
+
+		try {
+		    $hostname = "localhost";
+		    $dbname = "dfornez_adr3";
+		    $username = "dfornez_adr3";
+		    $pw = "Bridge2351$";
+		    $pdo = new PDO ("mysql:host=$hostname;dbname=$dbname","$username","$pw");
+		  } catch (PDOException $e) {
+		    echo "Failed to get DB handle: " . $e->getMessage() . "\n";
+		    exit;
+		  }
+		$query = $pdo->prepare("SELECT merchant_id, destination, destination_2, rating FROM mt_stablishiment_rating ORDER BY rating ASC");
+		$query->execute();
+			$array_top = array();
+				for($i=0; $row = $query->fetch(); $i++){
+					$arr = array('id' => $row['merchant_id'], 
+								 'rating' => $row['rating'] ,
+								 'img1' => str_replace('../../..', '', $row['destination']), 
+								 'img2' => str_replace('../../..', '', $row['destination_2'])
+								);
+
+					array_push($array_top, $arr);
+				}
+
+			$list = array('dat' => $array_top);
+        $this->code = 1;
+    	$this->msg = 'OK';
+    	$this->details =$list;
+
+	$this->output();
+
+   	}
+
+   	/// FIN ///
+
     public function actionloadPhotos()
     {
     	$list = array();
@@ -9543,5 +9711,3 @@ class ApiController extends CController
 	}
 	
 } /*end class*/
-
-
