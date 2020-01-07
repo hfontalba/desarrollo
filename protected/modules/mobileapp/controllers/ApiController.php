@@ -6932,11 +6932,9 @@ class ApiController extends CController
 	}
 	
 
-/**** seccion de codigo modificado por 
-		henry fontalba ****/ 
+/**** codigo modificado por henry fontalba ****/ 
 
 
-/** funcion que actualiza las cantidades a restar en la aplicacion **/
 	public function actionUpdate_item()
 	{
 
@@ -6953,50 +6951,21 @@ class ApiController extends CController
 		$this->code=1;
 		$this->msg="OK";
 		$this->output();
-	}
+		// $item_id = $item['item_id'];
+		// $item_cant = $item['item_cant'];
+		// dump($item_id);
+		// $params = array('item_id'=>$item_id,
+		// 				'item_cant'=>$item_cant);
 
-/** funcion que actualiza las cantidades de productos que son cancelados y devueltos
-    al stock de inventario **/
+		// $DbExt->updateData("{{item}}", $params, 'item_id',  $item_id);
+// aqui va la sentencia sql que necesito //
 
-public function actionCancelOrderCart()
-{
-
-	if (isset($this->data['itemCancel']))
-	{
-		$itemArray= json_decode($this->data['itemCancel'], true);
-		$DbExt=new DbExt;
-		$i = 0;
-		foreach ($itemArray as $val)
-		{
-				$id = $val['item_id'];
-				
-				/*** Consulto la cantidad que tiene en BD ***/
-
-				$sql = "SELECT item_cant 
-						FROM {{item}}
-						WHERE item_id =".$id."";
-
-				$item_cant=$DbExt->rst($sql);
-
-				/***Devuelvo los Producto a Inventario (Sumo los disponibles + los que estan en el Carro de Compras)***/
-				
-				$cant_total = $item_cant[0]["item_cant"] + $val['item_cant'];
-				
-				$params=array('item_id'=>$val['item_id'],
-							  'item_cant'=>$cant_total,); 
-				
-				/*** Actualizo las Cantidades en BD ***/
-				$DbExt->updateData("{{item}}", $params, 'item_id',  $val['item_id']);
-				
-		}
-
-		$this->code=1;
-	 	$this->msg="OK";
-		$this->output();
+		//$this->code=1;
+		//$this->msg="OK";
+		//$this->output();
 	}
 
 	
-}
 
 	public function actionClearCart()
 	{
@@ -8627,7 +8596,7 @@ public function actionCancelOrderCart()
 		WHERE
 		merchant_id =".self::q($this->data['merchant_id'])."
 		AND
-		category like '%$category%'
+		category like '$category'
 		AND status in ('publish','published')
 		$and
 		";
