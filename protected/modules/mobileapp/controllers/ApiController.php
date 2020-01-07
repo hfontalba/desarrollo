@@ -1494,7 +1494,7 @@ class ApiController extends CController
 				} 
 				
 			    $this->code=1;
-			    $this->msg="OK";
+			    $this->msg="OK estoy en el agregar a carrito";
 			    $this->details=array(		
 			      /*'is_merchant_open'=>$is_merchant_open,
 			      'merchant_preorder'=>$merchant_preorder,*/
@@ -2803,6 +2803,7 @@ class ApiController extends CController
 		  'email_address'=>$this->t("email address is required"),
 		  'password'=>$this->t("password is required"),
 		  'cpassword'=>$this->t("confirm password is required"),
+		  'type_identification_card'=>$this->t("nacionality is required"),
 		  'identification_card'=>$this->t("identification card is required"),
 		  'birthday'=>$this->t("birthdate is required"),
 		);
@@ -2852,7 +2853,7 @@ class ApiController extends CController
 	    		  'contact_phone'=>$p->purify($this->data['contact_phone']),
 	    		  'token'=>$token,
 	    		  'social_strategy'=>"mobile",
-	    		  'id_card'=>$p->purify($this->data['identification_card']),
+	    		  'id_card'=>$p->purify($this->data['type_identification_card'].$this->data['identification_card']),
 	    		  'birthdate'=>$p->purify($this->data['birthday'])
 	    		);	    	    	
 	    		
@@ -6925,11 +6926,78 @@ class ApiController extends CController
 				$DbExt->updateData("{{mobile_cart}}",$params,'device_id',$this->data['device_id']);
 			}								
 		}	
-		$this->code=1;
+		$this->code=3;
 		$this->msg="OK";
 		$this->output();
 	}
 	
+
+/**** seccion de codigo modificado por 
+		henry fontalba ****/ 
+
+
+/** funcion que actualiza las cantidades a restar en la aplicacion **/
+	public function actionUpdate_item()
+	{
+
+		if (isset($this->data['item']))
+		{
+			$item = json_decode($this->data['item'], true);
+			$DbExt=new DbExt;
+			$params = array('item_id'=>$item['item_id'],
+							'item_cant'=>$item['item_cant']);
+			$DbExt->updateData("{{item}}", $params, 'item_id',  $item['item_id']);
+			
+		}
+		
+		$this->code=1;
+		$this->msg="OK";
+		$this->output();
+	}
+
+/** funcion que actualiza las cantidades de productos que son cancelados y devueltos
+    al stock de inventario **/
+
+public function actionCancelOrderCart()
+{
+
+	if (isset($this->data['itemCancel']))
+	{
+		$itemArray= json_decode($this->data['itemCancel'], true);
+		$DbExt=new DbExt;
+		$i = 0;
+		foreach ($itemArray as $val)
+		{
+				$id = $val['item_id'];
+				
+				/*** Consulto la cantidad que tiene en BD ***/
+
+				$sql = "SELECT item_cant 
+						FROM {{item}}
+						WHERE item_id =".$id."";
+
+				$item_cant=$DbExt->rst($sql);
+
+				/***Devuelvo los Producto a Inventario (Sumo los disponibles + los que estan en el Carro de Compras)***/
+				
+				$cant_total = $item_cant[0]["item_cant"] + $val['item_cant'];
+				
+				$params=array('item_id'=>$val['item_id'],
+							  'item_cant'=>$cant_total,); 
+				
+				/*** Actualizo las Cantidades en BD ***/
+				$DbExt->updateData("{{item}}", $params, 'item_id',  $val['item_id']);
+				
+		}
+
+		$this->code=1;
+	 	$this->msg="OK";
+		$this->output();
+	}
+
+	
+}
+
 	public function actionClearCart()
 	{
 		$DbExt=new DbExt;
@@ -8559,7 +8627,7 @@ class ApiController extends CController
 		WHERE
 		merchant_id =".self::q($this->data['merchant_id'])."
 		AND
-		category like '$category'
+		category like '%$category%'
 		AND status in ('publish','published')
 		$and
 		";
@@ -8597,7 +8665,8 @@ class ApiController extends CController
 		$data='';
 		//$category='%"'.addslashes($this->data['cat_id']).'"%';		
 		$category= FunctionsV3::q('%"'.$this->data['cat_id'].'"%');
-		
+		$verif = Yii::app()->functions->getNeedInventory($this->data['merchant_id']);
+		$inventory = $verif['need_inventory'];
 		$merchant_id = $this->data['merchant_id'];
 		//$page = isset($this->data['page'])?$this->data['page']:0;
 		if (isset($this->data['page'])){
@@ -8703,21 +8772,44 @@ class ApiController extends CController
 					} else $icon_dish='';
 				} else $icon_dish='';
 				
+
+				if ($inventory == 1)
+				{
+					$data[]=array(
+				      'item_id'=>$val['item_id'],
+				      'item_name'=>$p->purify($val['item_name']),
+				      'item_description'=>$p->purify($val['item_description']),
+				      'discount'=>$val['discount'],
+				      'photo'=>AddonMobileApp::getImage($val['photo']),
+				      'spicydish'=>$val['spicydish'],
+				      'dish'=>$val['dish'],			      
+				      'prices'=>$price_new,
+				      'item_cant'=>$val['item_cant'],				
+				      'single_item'=>$single_item,
+				      'single_details'=>$single_details,
+				      'not_available'=>$val['not_available'],
+				      'icon_dish'=>$icon_dish
+				    );			
+				}else
+				{
+					$data[]=array(
+				      'item_id'=>$val['item_id'],
+				      'item_name'=>$p->purify($val['item_name']),
+				      'item_description'=>$p->purify($val['item_description']),
+				      'discount'=>$val['discount'],
+				      'photo'=>AddonMobileApp::getImage($val['photo']),
+				      'spicydish'=>$val['spicydish'],
+				      'dish'=>$val['dish'],			      
+				      'prices'=>$price_new,
+				      'item_cant'=>$val['item_cant'],				
+				      'single_item'=>$single_item,
+				      'single_details'=>$single_details,
+				      'not_available'=>$val['not_available'],
+				      'icon_dish'=>$icon_dish
+				    );			
+				}
 				
-				$data[]=array(
-			      'item_id'=>$val['item_id'],
-			      'item_name'=>$p->purify($val['item_name']),
-			      'item_description'=>$p->purify($val['item_description']),
-			      'discount'=>$val['discount'],
-			      'photo'=>AddonMobileApp::getImage($val['photo']),
-			      'spicydish'=>$val['spicydish'],
-			      'dish'=>$val['dish'],			      
-			      'prices'=>$price_new,				
-			      'single_item'=>$single_item,
-			      'single_details'=>$single_details,
-			      'not_available'=>$val['not_available'],
-			      'icon_dish'=>$icon_dish
-			    );				
+					
 				
 			}/* end foreach*/
 			
@@ -9482,3 +9574,5 @@ class ApiController extends CController
 	}
 	
 } /*end class*/
+
+
