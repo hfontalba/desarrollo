@@ -7027,22 +7027,68 @@ class ApiController extends CController
 			$this->output();
 		}
 	}
-	/*public function actionUpdate_item()
+	
+
+/** funcion que actualiza las cantidades de productos que son cancelados y devueltos
+    al stock de inventario **/
+
+public function actionCancelOrderCart()
+{
+
+	if (isset($this->data['itemCancel']))
 	{
-		if (isset($this->data['item']))
+		$itemArray= json_decode($this->data['itemCancel'], true);
+		$DbExt=new DbExt;
+		$i = 0;
+		foreach ($itemArray as $val)
 		{
-			$item[] = json_decode($this->data['item'], true);
-			$DbExt=new DbExt;
-			//$params = array('item_id'=>$item['item_id'],
-							'item_cant'=>$item['item_cant']);
-			//$DbExt->updateData("{{item}}", $params, 'item_id',  $item['item_id']);
-			$this->code=$item['item_id'];
-			$this->msg="OK";
-			$this->output();
+				$id = $val['item_id'];
+				
+				/*** Consulto la cantidad que tiene en BD ***/
+
+				$sql = "SELECT item_cant 
+						FROM {{item}}
+						WHERE item_id =".$id."";
+
+				$item_cant=$DbExt->rst($sql);
+
+				/***Devuelvo los Producto a Inventario (Sumo los disponibles + los que estan en el Carro de Compras)***/
+				
+				$cant_total = $item_cant[0]["item_cant"] + $val['item_cant'];
+				
+				$params=array('item_id'=>$val['item_id'],
+							  'item_cant'=>$cant_total,); 
+				
+				/*** Actualizo las Cantidades en BD ***/
+				$DbExt->updateData("{{item}}", $params, 'item_id',  $val['item_id']);
+				
 		}
-	}*/
+
+		$this->code=1;
+	 	$this->msg="OK";
+		$this->output();
+	}
 
 	
+}
+
+
+	public function actionClearCart()
+	{
+		$DbExt=new DbExt;
+		if(isset($this->data['device_id'])){
+			$DbExt->qry("
+			DELETE FROM {{mobile_cart}}
+			WHERE
+			device_id=".AddonMobileApp::q($this->data['device_id'])."
+			");
+		}
+		$this->code=1;
+		$this->msg="OK";
+		$this->output();
+	}
+
+
 	public function actionClearCart()
 	{
 		$DbExt=new DbExt;
