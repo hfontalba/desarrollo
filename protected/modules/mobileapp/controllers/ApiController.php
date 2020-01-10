@@ -614,10 +614,6 @@ class ApiController extends CController
 	}
 	
 
-
-
-/************************** HAY QUE CAMBIAR AQUI LOS PRECIOS PARA MOSTRAR TAMBIEN EN USD. **********************************/
-
 /***************************************************************
  * SECCION MODIFICADO POR:
  * HENRY J.N. FONTALBA L.
@@ -676,6 +672,34 @@ class ApiController extends CController
 					}
 				}				
 				
+				#obtengo el precio en $ y lo guardo en un array para enviarlo a la aplicacion.
+
+				$price_usd='';
+				if (is_array($val['prices_usd']) && count($val['prices_usd'])>=1)
+				{
+					foreach ($val['prices_usd'] as $val_priceUsd)
+					{
+						$val_priceUsd['price_pretty']=displayPrice('USD',prettyFormat($val_priceUsd['price']));
+						if(isset($_GET['lang_id']))
+						{
+							if($_GET['lang_id']>0)
+							{
+								 if (array_key_exists($_GET['lang_id'],(array)$val_priceUsd['size_trans']))
+								 {
+								 	$val_priceUsd['size']=$val_priceUsd['size_trans'][$_GET['lang_id']];
+								 }
+							}
+						}
+
+						if ($val['discount']>0)
+						{
+							$val_priceUsd['price_discount']=$val_priceUsd['price']-$val['discount'];
+							$val_priceUsd['price_discount_pretty']=AddonMobileApp::prettyPrice($val_priceUsd['price']-$val['discount']);
+						}
+
+						$price_usd[]=$val_priceUsd;		
+					}	
+				}
 
 				/*dump($price);
 				die();*/
@@ -706,6 +730,7 @@ class ApiController extends CController
 						  'single_details'=>$val['single_details'],
 						  'not_available'=>$val['not_available'],
 						  'prices'=>$price,
+						  'prices_usd'=>$price_usd,
 						  'need_inventory'=>$inventory['need_inventory']
 						);
 					}else{
@@ -721,6 +746,8 @@ class ApiController extends CController
 						  'single_details'=>$val['single_details'],
 						  'not_available'=>$val['not_available'],
 						  'prices'=>$price,
+						  'prices_usd'=>$price_usd,
+						  'item_cant'=>$val['item_cant'],
 						  'need_inventory'=>$inventory['need_inventory']
 						);
 					}
@@ -830,10 +857,12 @@ class ApiController extends CController
 		$this->output();
 	}
 	
-
-
-	/************************** HAY QUE CAMBIAR AQUI LOS PRECIOS PARA MOSTRAR TAMBIEN EN USD. **********************************/
-
+/***************************************************************
+ * SECCION MODIFICADO POR:
+ * HENRY J.N. FONTALBA L.
+ * OBJETIVOS: MODIFICACION PARA QUE LOS PRODUCTOS MUESTREN LOS
+ * PRECIOS DE LOS EXTRAS TANTO EN Bs.S COMO EN $
+ ***************************************************************/ 
 
 	public function actionGetItemDetails()
 	{		
@@ -896,9 +925,15 @@ class ApiController extends CController
             }
 			//die();
 			
-			if (is_array($data['prices']) && count($data['prices'])){
+			#Verifico que se hayan obtenido los precios en dolares correctamente.
+
+			if (is_array($data['prices']) && count($data['prices'])>0){
 				$data['has_price']=2;		
-				$price='';		
+				
+				#precio en Bs.S
+				$price='';
+
+				#obtengo el Precio en Bs.S		
 				foreach ($data['prices'] as $p) {	
 					$discounted_price=$p['price'];
 					if ($data['discount']>0){
@@ -923,10 +958,58 @@ class ApiController extends CController
 					  'discounted_price_pretty'=>AddonMobileApp::prettyPrice($discounted_price)
 					);
 				}
+
+				#Guardo el Valor del Precio en Bs.S				
 				$data['prices']=$price;
-			} else $data['has_price']=1;
+				
+			}else
+			{
+				$data['has_price']=1;	
+			} 
 			
-			
+			#verifico que se hayan obtenido los precios en $ correctamente.
+			if (is_array($data['prices_usd']) && count($data['prices_usd'])>0)
+			{
+				#precio del producto en $.
+				$price_usd = '';
+
+				#obtengo el precio en $.
+				foreach ($data['prices_usd'] as $ps)
+				{
+					$discount_price=$ps['price_usd'];
+					if ($data['discount']>0)
+					{
+						$discount_price = $discount_price - $data['discount'];		
+					}	
+
+					if( $trans==2 && isset($_GET['lang_id']))
+					{
+						$lang_id=$_GET['lang_id'];
+						if (array_key_exists($lang_id,(array)$p['size_trans']))
+						{
+							if (!empty($ps['size_trans'][$lang_id]))
+							{
+								$ps['size']=$ps['size_trans'][$lang_id];
+								
+							}
+							
+						}
+					}
+					$price_usd[]=array(
+					  'price'=>$p['price_usd'],
+					  'pretty_price'=>displayPrice(getDollarSimbol(),prettyFormat($ps['price_usd'],$this->data['merchant_id'])),
+					  'size'=>$p['size'],
+					  'discounted_price'=>$discount_price,
+					  'discounted_price_pretty'=>AddonMobileApp::prettyPrice($discount_price)
+					);
+					
+				}
+
+				#Guardo el Valor del Precio en Bs.S	
+				$data['prices_usd']=$prices_usd;
+
+			}
+
 			if (is_array($data['addon_item']) && count($data['addon_item'])>=1){
 				$addon_item='';					
 				foreach ($data['addon_item'] as $val) {
@@ -945,10 +1028,11 @@ class ApiController extends CController
 					   	   //unset($val2['item_description_trans']);
 					   	   $val2['pretty_price']=displayPrice(getCurrencyCode(),
 					   	   prettyFormat($val2['price'],$this->data['merchant_id']));	
-					   	   
+					   	   $val2['pretty_price_usd']=displayPrice('USD', prettyFormat($val2['price_usd'],$this->data['merchant_id']));
 					   	   /*check if price is numeric*/
-					   	   if (!is_numeric($val2['price'])){
+					   	   if (!is_numeric($val2['price'])&&(!is_numeric($val2['price_usd']))){
 					   	   	   $val2['price']=0;
+					   	   	   $val2['price_usd']=0;
 					   	   }
 					   	   
 					   	   if ( $trans==2 && isset($_GET['lang_id'])){  
@@ -7027,68 +7111,22 @@ class ApiController extends CController
 			$this->output();
 		}
 	}
-	
-
-/** funcion que actualiza las cantidades de productos que son cancelados y devueltos
-    al stock de inventario **/
-
-public function actionCancelOrderCart()
-{
-
-	if (isset($this->data['itemCancel']))
+	/*public function actionUpdate_item()
 	{
-		$itemArray= json_decode($this->data['itemCancel'], true);
-		$DbExt=new DbExt;
-		$i = 0;
-		foreach ($itemArray as $val)
+		if (isset($this->data['item']))
 		{
-				$id = $val['item_id'];
-				
-				/*** Consulto la cantidad que tiene en BD ***/
-
-				$sql = "SELECT item_cant 
-						FROM {{item}}
-						WHERE item_id =".$id."";
-
-				$item_cant=$DbExt->rst($sql);
-
-				/***Devuelvo los Producto a Inventario (Sumo los disponibles + los que estan en el Carro de Compras)***/
-				
-				$cant_total = $item_cant[0]["item_cant"] + $val['item_cant'];
-				
-				$params=array('item_id'=>$val['item_id'],
-							  'item_cant'=>$cant_total,); 
-				
-				/*** Actualizo las Cantidades en BD ***/
-				$DbExt->updateData("{{item}}", $params, 'item_id',  $val['item_id']);
-				
+			$item[] = json_decode($this->data['item'], true);
+			$DbExt=new DbExt;
+			//$params = array('item_id'=>$item['item_id'],
+							'item_cant'=>$item['item_cant']);
+			//$DbExt->updateData("{{item}}", $params, 'item_id',  $item['item_id']);
+			$this->code=$item['item_id'];
+			$this->msg="OK";
+			$this->output();
 		}
-
-		$this->code=1;
-	 	$this->msg="OK";
-		$this->output();
-	}
+	}*/
 
 	
-}
-
-
-	public function actionClearCart()
-	{
-		$DbExt=new DbExt;
-		if(isset($this->data['device_id'])){
-			$DbExt->qry("
-			DELETE FROM {{mobile_cart}}
-			WHERE
-			device_id=".AddonMobileApp::q($this->data['device_id'])."
-			");
-		}
-		$this->code=1;
-		$this->msg="OK";
-		$this->output();
-	}
-
-
 	public function actionClearCart()
 	{
 		$DbExt=new DbExt;
@@ -9327,14 +9365,17 @@ public function actionCancelOrderCart()
 		    echo "Failed to get DB handle: " . $e->getMessage() . "\n";
 		    exit;
 		  }
-		$query = $pdo->prepare("SELECT merchant_id, destination, destination_2, rating FROM mt_stablishiment_rating ORDER BY rating ASC");
+		$query = $pdo->prepare("SELECT merchant_id, item_id, cat_id, rating, destination, destination_2  FROM mt_stablishiment_rating ORDER BY rating ASC");
 		$query->execute();
 			$array_top = array();
 				for($i=0; $row = $query->fetch(); $i++){
-					$arr = array('id' => $row['merchant_id'], 
-								 'rating' => $row['rating'] ,
+					$arr = array('merchant_id' => $row['merchant_id'], 
+								 'item_id' => $row['item_id'],
+								 'cat_id' => $row['cat_id'],
+								 'rating' => $row['rating'],
 								 'img1' => str_replace('../../..', '', $row['destination']), 
-								 'img2' => str_replace('../../..', '', $row['destination_2'])
+								 'img2' => str_replace('../../..', '', $row['destination_2']),
+								 'url_prod' => "loadRestaurantCategory(".$row['merchant_id'].")"
 								);
 
 					array_push($array_top, $arr);
